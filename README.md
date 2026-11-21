@@ -19,10 +19,12 @@ Run them in order. Each one saves its output for the next.
 
 | Model | MAE | R2 |
 |---|---|---|
-| **XGBoost (Optuna)** | **102.1** | **0.837** |
-| Random Forest (Optuna) | 103.2 | 0.834 |
-| ANN (Optuna) | 104.2 | 0.836 |
-| Linear Regression (baseline) | 116.5 | 0.786 |
+| **XGBoost (Optuna)** | **98.5** | **0.772** |
+| Random Forest (Optuna) | 100.0 | 0.768 |
+| ANN (Optuna) | 102.7 | 0.759 |
+| Linear Regression (baseline) | 109.8 | 0.725 |
+
+The top 1% of spenders (above ~1,889 next month) are dropped in preprocessing, so the model is built for the other 99% of customers and will under-predict extreme spenders.
 
 ## App
 

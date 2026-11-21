@@ -6,9 +6,11 @@ st.title("Customer Next Month Spend Prediction")
 
 # load the tuned XGBoost model, the cleaned data (for input defaults) and the model's column order
 model = joblib.load("models/xgboost_optuna.pkl")
-# gender and avg_order_value_6m are dropped in 03_feature_engineering.ipynb, so the app doesn't ask for them
-data = pd.read_csv("data/processed/cleaned.csv").drop(columns=["spend_next_month", "gender", "avg_order_value_6m"])
+# columns dropped in 03_feature_engineering.ipynb, so the app doesn't ask for them
+dropped = ["spend_next_month", "gender", "avg_order_value_6m", "snapshot_month", "snapshot_quarter", "email_data_available"]
+data = pd.read_csv("data/processed/cleaned.csv").drop(columns=dropped)
 model_columns = pd.read_csv("data/processed/X_test.csv", nrows=0).columns
+income_median = data.groupby(["region", "membership_tier"])["annual_income"].median()
 
 
 def predict(df):
@@ -16,7 +18,8 @@ def predict(df):
 
     # same missing value handling as 01_preprocessing.ipynb
     df["education"] = df["education"].fillna("Unknown")
-    df["annual_income"] = df["annual_income"].fillna(data["annual_income"].median())
+    group_income = pd.Series(list(zip(df["region"], df["membership_tier"])), index=df.index).map(income_median)
+    df["annual_income"] = df["annual_income"].fillna(group_income).fillna(data["annual_income"].median())
     df["spend_trend_ratio"] = df["spend_trend_ratio"].fillna(data["spend_trend_ratio"].median())
     df["email_open_rate"] = df["email_open_rate"].fillna(0)
     df["email_click_rate"] = df["email_click_rate"].fillna(0)
@@ -66,6 +69,8 @@ with tab2:
 
     if file is not None:
         uploaded = pd.read_csv(file)
+        if "snapshot_year" not in uploaded.columns and "snapshot_date" in uploaded.columns:
+            uploaded["snapshot_year"] = pd.to_datetime(uploaded["snapshot_date"]).dt.year
         missing = [c for c in data.columns if c not in uploaded.columns]
 
         if missing:
