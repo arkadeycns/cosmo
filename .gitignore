@@ -1,0 +1,7 @@
+# too large for GitHub, recreated by 04_model_training and 05_tuning
+models/random_forest.pkl
+models/random_forest_optuna.pkl
+
+.ipynb_checkpoints/
+__pycache__/
+.DS_Store
